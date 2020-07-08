@@ -1,0 +1,13 @@
+colorama >= 0.4.1
+PySocks >= 1.7.1
+bs4 >= 0.0.1
+pysqlite3 >= 0.4.1
+requests >= 2.13.0
+argparse >= 1.4.0
+dnspython >= 1.16.0
+ipwhois >= 1.1.0
+selenium == 3.141.0
+requests-random-user-agent >= 0.0.18
+python-docx >= 0.8.10
+pillow >= 7.0.0
+shodan
