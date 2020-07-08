@@ -1,7 +1,10 @@
 # LazyOSINT
 Yet another multithreading OSINT automator.
 
-![alt text](https://github.com/lapolis/LazyOSINT/blob/master/LazyOSINT_small.png?raw=true)
+<p align="center">
+  <img src="https://github.com/lapolis/LazyOSINT/blob/master/LazyOSINT_small.png?raw=true">
+</p>
+
 
 # Intro
 
