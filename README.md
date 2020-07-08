@@ -10,11 +10,13 @@ Yet another multithreading OSINT automator.
 
 LazyOSINT born from a simple Bash script I made to automate the initial enumeration during my internship last summer. The decision to switch to Python and improve it came last October when I had to decide what to develop as my final year project.
 
-LazyOSINT uses sublist3r by aboul3la in order to passively gather all the subdomains availables from all the sources listed in sublist3r. Then it resolves all the subdomains and query Shodan to enumerate potential open ports and the respective headers.
+LazyOSINT uses sublist3r by aboul3la in order to passively gather all the subdomains available from all the sources listed in sublist3r. Then it resolves all the subdomains and query Shodan to enumerate potential open ports and the respective headers.
 
 While that enumeration runs, using Selenium, it retrieves all the employees from the company’s LinkedIn account. In case of a private user, a quick google search is done trying to reveal the real name behind that hidden profile. Unfortunately, the queries to Google are limited but all the intelligences are saved and the research can be manually carried out.
 
-I am aware of the fact that it might be a bit messi, open to suggestions by whoever feels like giving some tips.
+I am aware of the fact that it might be a bit messy, open to suggestions by whoever feels like giving some tips.
+
+A huge “thank you” goes to Fausto Fasan for the magnificent logo! --> [LinkedIn](https://www.linkedin.com/in/fausto-fasan-4587a71a9/)
 
 # Installation
 
