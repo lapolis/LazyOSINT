@@ -1,7 +1,7 @@
 # LazyOSINT
 Yet another multithreading OSINT automator.
 
-![alt text](http://xxx.png)
+![alt text](https://github.com/lapolis/LazyOSINT/blob/master/LazyOSINT_logo_small.png?raw=true)
 
 # Intro
 
