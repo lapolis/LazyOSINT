@@ -14,6 +14,8 @@ LazyOSINT uses sublist3r by aboul3la in order to passively gather all the subdom
 
 While that enumeration runs, using Selenium, it retrieves all the employees from the company’s LinkedIn account. In case of a private user, a quick google search is done trying to reveal the real name behind that hidden profile. Unfortunately, the queries to Google are limited but all the intelligences are saved and the research can be manually carried out.
 
+All the data is written in a SQLite database.
+
 I am aware of the fact that it might be a bit messy, open to suggestions by whoever feels like giving some tips.
 
 A huge “thank you” goes to Fausto Fasan for the magnificent logo! --> [LinkedIn](https://www.linkedin.com/in/fausto-fasan-4587a71a9/)
@@ -38,8 +40,9 @@ cd ..
 
 ### Installi LazyOSINT
 ```
-cd LazyOSINT-master/
+cd LazyOSINT/
 pip3.8 install -r requirements.txt
+chmod +x ./main.py
 ./main -h
 ```
 
