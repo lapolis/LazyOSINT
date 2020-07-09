@@ -91,9 +91,9 @@ class Stash :
         ## EMPLOYEES
         create_sql.append( """ CREATE TABLE IF NOT EXISTS employees ( \
         comp_link TEXT, \
-        name TEXT PRIMARY KEY, \
+        name TEXT, \
         position TEXT, \
-        prof_link TEXT, \
+        prof_link TEXT PRIMARY KEY, \
         prof_pic TEXT, \
         email TEXT, \
         FOREIGN KEY ( comp_link ) REFERENCES testing ( linkedin_link ) ); """)
@@ -101,11 +101,18 @@ class Stash :
         ## EMPLOYEES
         create_sql.append( """ CREATE TABLE IF NOT EXISTS potential_employees ( \
         comp_link TEXT, \
-        name TEXT PRIMARY KEY, \
+        name TEXT, \
         position TEXT, \
         prof_link TEXT, \
         prof_pic TEXT, \
         email TEXT, \
+        FOREIGN KEY ( comp_link ) REFERENCES testing ( linkedin_link ) ); """)
+
+        ## EMPLOYEES
+        create_sql.append( """ CREATE TABLE IF NOT EXISTS hidden_employees ( \
+        comp_link TEXT, \
+        position TEXT, \
+        prof_pic TEXT, \
         FOREIGN KEY ( comp_link ) REFERENCES testing ( linkedin_link ) ); """)
 
         # SUBDOMAINS

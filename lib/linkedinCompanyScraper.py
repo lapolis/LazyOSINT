@@ -67,6 +67,12 @@ class LinkedIn :
                 sqlv = ( self.c_link, name, job_title, prof_link, pic_lnk )
                 self.log.findings( f'Found potential employe {name}, working as {job_title}' )
                 self.stash.sql_execcc( sqlq, sqlv )
+            else:
+                pic_lnk = pic_lnk if pic_lnk else 'NA'
+                sqlq = 'INSERT INTO hidden_employees( comp_link, position, prof_pic ) VALUES(?, ?, ?)'
+                sqlv = ( self.c_link, job_title, pic_lnk )
+                self.log.info( f'Impossible to find user. Details saved anyway.' )
+                self.stash.sql_execcc( sqlq, sqlv )
 
         except Exception as e:
             self.log.error( e )
