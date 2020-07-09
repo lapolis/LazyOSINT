@@ -70,3 +70,4 @@ Potential TODO list to complete if I ever survive to OSCP:
 - check if password was the right one in selenium
 - find more than 1k employees (linkedin limit to 100 pages)
 - use proxy for google - not working, still reCAPTCHA
+- Generate a potential email based on a company template
