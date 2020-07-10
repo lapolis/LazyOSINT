@@ -67,6 +67,7 @@ If you do not specify the LinkedIn password in the command line it will be asked
 
 # TODO
 Potential TODO list to complete if I ever survive to OSCP:
+- Add more checks on the LinkedIn module
 - check if password was the right one in selenium
 - find more than 1k employees (linkedin limit to 100 pages)
 - use proxy for google - not working, still reCAPTCHA
