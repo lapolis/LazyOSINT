@@ -38,7 +38,7 @@ sudo python3.8 setup.py install
 cd ..
 ```
 
-### Installi LazyOSINT
+### Installing LazyOSINT
 ```
 cd LazyOSINT/
 pip3.8 install -r requirements.txt
