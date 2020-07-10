@@ -53,13 +53,13 @@ chmod +x ./main.py
 ./main.py -f myDatabaseName -d londonmet.ac.uk -l myLogFile
 ```
 
-#### Run the linkedin scraping module against LondonMet Linkedin page using as a ALREADY EXISTING linkedin account email "example@gmail.com" with password "password" and save all the data database "myDatabaseName".
+#### Run the LinkedIn scraping module against LondonMet LinkedIn page using as a ALREADY EXISTING LinkedIn account email "example@gmail.com" with password "password" and save all the data database "myDatabaseName".
 If you do not specify the LinkedIn password in the command line it will be asked later.
 ```
 ./main.py -f myDatabaseName -u https://www.linkedin.com/school/london-metropolitan-university/ -e example@gmail.com -p password
 ```
 
-#### Run the linkedin scraping module and a full domain enumeration.
+#### Run the LinkedIn scraping module and a full domain enumeration.
 ```
 ./main.py -f myDatabaseName -u https://www.linkedin.com/school/london-metropolitan-university/ -e example@gmail.com -d londonmet.ac.uk -l myLogFile
 ```
@@ -69,6 +69,6 @@ If you do not specify the LinkedIn password in the command line it will be asked
 Potential TODO list to complete if I ever survive to OSCP:
 - Add more checks on the LinkedIn module
 - check if password was the right one in selenium
-- find more than 1k employees (linkedin limit to 100 pages)
+- find more than 1k employees (LinkedIn limit to 100 pages)
 - use proxy for google - not working, still reCAPTCHA
 - Generate a potential email based on a company template
