@@ -42,7 +42,7 @@ class whoisNstuff :
 
         if not doms:
             self.log.error('No findings in dnsDumpster')
-            sys.exit(0)
+            # sys.exit(0)
         else:
             [ self.log.findings(d) for d in doms ]
 
