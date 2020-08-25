@@ -40,10 +40,11 @@ cd ..
 
 ### Installing LazyOSINT
 ```
+git clone https://github.com/lapolis/LazyOSINT.git
 cd LazyOSINT/
 pip3.8 install -r requirements.txt
 chmod +x ./main.py
-./main -h
+./main.py -h
 ```
 
 
