@@ -54,7 +54,7 @@ chmod +x ./main.py
 ./main.py -f myDatabaseName -d londonmet.ac.uk -l myLogFile
 ```
 
-#### Run the LinkedIn scraping module against LondonMet LinkedIn page using as a ALREADY EXISTING LinkedIn account email "example@gmail.com" with password "password" and save all the data database "myDatabaseName".
+#### Run the LinkedIn scraping module against LondonMet LinkedIn page using as a ALREADY EXISTING LinkedIn account email "`example@gmail.com`" with password "password" and save all the data database "myDatabaseName".
 If you do not specify the LinkedIn password in the command line it will be asked later.
 ```
 ./main.py -f myDatabaseName -u https://www.linkedin.com/school/london-metropolitan-university/ -e example@gmail.com -p password
