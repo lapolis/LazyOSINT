@@ -44,7 +44,7 @@ class whoisNstuff :
             self.log.error('No findings in dnsDumpster')
             # sys.exit(0)
         else:
-            [ self.log.findings(d) for d in doms ]
+            [ self.log.findings( f'dnsDumpster found {d}' ) for d in doms ]
 
         for s in list( set( doms ) ):
             # sql = f'INSERT INTO subdomains( domain, subdomain ) VALUES( "{domain}" , "{s}" )'
@@ -73,7 +73,7 @@ class whoisNstuff :
             self.log.error( f'No findings with {engine}' )
         else:
             cleanDoms = list( set( [d.replace('0-','') for dom in doms for d in dom.split('<BR>')] ))
-            [ self.log.findings( d ) for d in cleanDoms ]
+            [ self.log.findings( f'{engine} found {d}' ) for d in cleanDoms ]
             present_subdomains = self.stash.get_column( 'subdomains', 'subdomain' )
             for s in [ x for x in cleanDoms if x not in present_subdomains ] :
                 sqlq = 'INSERT INTO subdomains( domain, subdomain ) VALUES(?, ?)'
