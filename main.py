@@ -63,13 +63,15 @@ def main() :
 
     domain = args.domain
     if domain :
-        dom_reg = r'(?:^https:\/\/|^http:\/\/|^\/|^)(\w*?\.\w*\.?\w*)'
+        # dom_reg = r'(?:^https:\/\/|^http:\/\/|^\/|^)(\w*?\.\w*\.?\w*)'
+        dom_reg = r'(?:^https:\/\/|^http:\/\/|^\/|^)(\w*?\.?\w*\.?[\w\-\.]*)'
         found = re.search( dom_reg, domain )
         if found :
             domain = found.group(1)
             stash.db_init( domain )
         else :
             log.error( f'The domain doesn\'t look like a domain.' )
+            sys.exit(1)
 
     ## sanitize linkedin url
     linkedin_url = args.linkedin_url
@@ -81,7 +83,7 @@ def main() :
         else :
             log.error( f'The linkedin company\'s url doesn\'t look right.' )
             linkedin_url = None
-
+            sys.exit(1)
 
     if not args.no_resolv :
         SHODAN_API_KEY = None
