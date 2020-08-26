@@ -1,19 +1,19 @@
 #!/usr/bin/env python3.8
 
-import requests
 import io
 import os
 import re
-from urllib.parse import quote
 import sys
 import time
 import random
-import requests_random_user_agent
-from PIL import Image
 import hashlib
+import requests
+from PIL import Image
+from urllib.parse import quote
+import requests_random_user_agent
 
 class GetThem:
-    def __init__( self, log ):
+    def __init__( self, log, pause, b_pause ):
         self.log = log
         self.gooBan = True
 
@@ -21,6 +21,9 @@ class GetThem:
         self.ghost_pic = os.path.join( os.path.abspath( sys.argv[0].replace( 'main.py' , '' ) ), 'lib', 'ghost.png' )
         if not os.path.isdir( self.pic_dir ):
             os.makedirs( self.pic_dir )
+
+        self.pause = pause
+        self.b_pause = b_pause
 
     def download_img( self, url ):
         self.log.info( f'Trying to download {url}' )
@@ -42,12 +45,19 @@ class GetThem:
         except Exception as e:
             self.log.error( f'ERROR - Could not save {url} - {e}' )
 
-
     def waitRand( self ):
         ttt = random.randint(1000000000,6000000000)/10000000000
         self.log.info( f'Sleeping --> {ttt} seconds' )
         time.sleep( ttt )
 
+    def beeeeep( self ):
+        duration = 0.1
+        for freq in range(200,400,50):
+            os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
+        time.sleep(.2)
+        os.system('play -nq -t alsa synth {} sine {}'.format(duration, 400))
+        time.sleep(.1)
+        os.system('play -nq -t alsa synth {} sine {}'.format(duration, 400))
 
     def getThem( self, img_link, job_title, location ):
 
@@ -101,8 +111,31 @@ class GetThem:
                 name = ' '.join( link.split( '/' )[-1].split('-')[:-1] )
                 self.log.findings( f'Found potential matching account --> {name}' )
             elif BAN in search_results.text:
-                self.log.warning( 'GOOGLE trowed a reCAPTCHA.' )
-                self.gooBan = False
+                self.log.error( 'GOOGLE trowed a reCAPTCHA.' )
+
+                if self.pause or self.b_pause:
+                    if self.b_pause:
+                        self.beeeeep()
+                    self.log.warning( 'System paused, do what you need to do.. ..' )
+
+                    right = False
+                    while not right:
+                        self.log.warning( 'Do you want to retry the same query? [Yy/Nn]' )
+                        answ = input()
+
+                        if answ.isalpha():
+                            if answ.lower() == 'y':
+                                self.getThem( img_link, job_title, location )
+                            elif answ.lower() == 'n':
+                                right = True
+                            else:
+                                self.log.error( 'That was not an answer. Let\'s try again.' )
+                        else:
+                            self.log.error( 'That was not an answer. Let\'s try again.' )
+
+                else:
+                    self.gooBan = False
+
             elif nothing in search_results.text:
                 self.log.warning( 'No results for this query.' )
 

@@ -1,16 +1,17 @@
 #!/usr/bin/env python3.8
 
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options 
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from lib import googleImageSearch
 import time
 import random
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options 
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+from lib import googleImageSearch
 
 class LinkedIn :
-    def __init__( self, log, stash ):
+    def __init__( self, log, stash, company_url, temp_file, res, pause, beeppause ):
         self.chrome_options = Options()
         self.chrome_options.add_argument("--headless")
         self.chrome_options.add_argument("--window-size=1920,1080")
@@ -23,10 +24,18 @@ class LinkedIn :
         #                                upload_throughput=50 * 1024 )  # maximal throughput
 
         self.log = log
-        self.goog = googleImageSearch.GetThem( log )
+        self.goog = googleImageSearch.GetThem( log, pause, beeppause )
         self.stash = stash
         # self.t = concurrent.futures.ThreadPoolExecutor(max_workers=100)
         # self.threads = []
+
+        self.c_link = company_url
+        self.t_file = temp_file
+        self.resume = res
+
+        if res:
+            with open( remp_file , 'r' ) as tmp:
+                tmp.readline()
 
     def __sleep_rand( self ):
         time.sleep( random.randrange(1000,2000) * 0.001 )
@@ -71,7 +80,7 @@ class LinkedIn :
                 pic_lnk = pic_lnk if pic_lnk else 'NA'
                 sqlq = 'INSERT INTO hidden_employees( comp_link, position, prof_pic ) VALUES(?, ?, ?)'
                 sqlv = ( self.c_link, job_title, pic_lnk )
-                self.log.info( f'Impossible to find user. Details saved anyway.' )
+                self.log.warning( f'Impossible to find user. Details saved anyway.' )
                 self.stash.sql_execcc( sqlq, sqlv )
 
         except Exception as e:
@@ -112,8 +121,7 @@ class LinkedIn :
                 self.log.warning( 'No user info' )
                 infos = None
 
-    def scrapeThoseEmployeez( self, email, password, company_url ):
-        self.c_link = company_url
+    def scrapeThoseEmployeez( self, email, password ):
         self.login( email , password )
 
         # marks xpath
