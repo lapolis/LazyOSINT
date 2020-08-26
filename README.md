@@ -24,10 +24,11 @@ A huge “thank you” goes to Fausto Fasan for the magnificent logo! --> [Linke
 
 To use Shodan please put the API key in the file `API_KEYS.conf` .
 
-### Installing python-pip for python 3.8 and Libreoffice
+### Installing python-pip for python 3.8 and SOX (for the beep)
 ```
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 sudo python3.8 get-pip.py
+sudo apt install sox
 ```
 
 ### Installing Sublist3r
