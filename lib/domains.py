@@ -2,14 +2,14 @@
 
 import re
 import sys
-import shodan
 import time
+import shodan
 import requests
 import sublist3r
-from bs4 import BeautifulSoup
 from dns import resolver
 from ipwhois.net import Net
 from ipwhois.asn import IPASN
+from bs4 import BeautifulSoup
 
 class whoisNstuff :
 

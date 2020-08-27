@@ -1,9 +1,8 @@
 #!/usr/bin/env python3.8
 
 import sqlite3
-from sqlite3 import Error
 import datetime
-
+from sqlite3 import Error
 from colorama import Fore, Back, Style
 
 class Logger :
@@ -215,7 +214,38 @@ class Fuffa :
       MM     ,M 8M   MM   AMV  ,     VVV    `Mb.    ,dP' Mb     dM   MM    M     YMM       MM
     .JMMmmmmMMM `Moo9^Yo.AMMmmmM     ,V       `"bmmd"'   P"Ybmmd"  .JMML..JML.    YM     .JMML.
                                      ,V
-                                   OOb"
+                                   OOb"                                               by Lapolis
+
+    {Style.RESET_ALL + Fore.RESET}
+    '''
+
+    version = f'''{Fore.WHITE + Style.BRIGHT}
+
+                      *** ### ### ***
+                   *## {Fore.GREEN} ** ## ## ** {Fore.WHITE}  ##*
+               *##  {Fore.GREEN} *#             #* {Fore.WHITE}   ##*
+            *## {Fore.GREEN}  *#                   *  {Fore.WHITE}  ##*
+          *## {Fore.GREEN}  *#                       #*  {Fore.WHITE} ##*
+        *## {Fore.GREEN}  *#                           #* {Fore.WHITE}  ##*
+       *## {Fore.GREEN} *#                                #* {Fore.WHITE} ##*
+      *## {Fore.GREEN} *#      {Fore.WHITE}  .-~=``````````=~-.  {Fore.GREEN}      #* {Fore.WHITE} ##*
+     *## {Fore.GREEN} *#       {Fore.WHITE}  |       /\\       |  {Fore.GREEN}       #* {Fore.WHITE} ##*
+     *## {Fore.GREEN}*#   {Fore.WHITE}     __|      /  \\      |__ {Fore.GREEN}       #* {Fore.WHITE}##*
+     *## {Fore.GREEN}*#    {Fore.WHITE}   (        /{Fore.GREEN}<{Back.GREEN + Fore.BLACK}(){Back.RESET + Fore.GREEN}>{Fore.WHITE}\\        )  {Fore.GREEN}     #* {Fore.WHITE}##*
+     *## {Fore.GREEN}*#    {Fore.WHITE}    |      /______\\       |  {Fore.GREEN}     #* {Fore.WHITE}##*
+     *## {Fore.GREEN} *#    {Fore.WHITE}   |_____________________|  {Fore.GREEN}    #*  {Fore.WHITE}##*
+      *## {Fore.GREEN} *#   {Fore.WHITE}    X                  X  {Fore.GREEN}     #*  {Fore.WHITE}##*
+       *## {Fore.GREEN} *#                                #* {Fore.WHITE} ##*
+        *## {Fore.GREEN} *#                             #*  {Fore.WHITE} ##*
+          *## {Fore.GREEN} *#                         #*  {Fore.WHITE} ##*
+            *#  {Fore.GREEN}  *#                    #*  {Fore.WHITE} ##*
+               *## {Fore.GREEN}  *#              #*  {Fore.WHITE} ##*
+                   *## {Fore.GREEN}  ** ## ## **  {Fore.WHITE} ##*
+                       *** ### ### ***
+
+
+            {Fore.GREEN + Style.BRIGHT}LazyOSINT v0.2 
+            by Lapolis
 
     {Style.RESET_ALL + Fore.RESET}
     '''
