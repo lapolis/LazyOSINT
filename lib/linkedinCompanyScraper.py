@@ -3,7 +3,9 @@
 import os
 import time
 import random
+import datetime
 from selenium import webdriver
+from colorama import Fore, Back, Style
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options 
 from selenium.webdriver.support.ui import WebDriverWait
@@ -111,8 +113,8 @@ class LinkedIn :
 
                         right = False
                         while not right:
-                            self.log.warning( 'Do you want to retry the same query? [Yy/Nn]' )
-                            answ = input()
+                            msg = 'Do you want to retry the same query? [Yy/Nn] '
+                            answ = input(f'{Fore.YELLOW}## WARNING {datetime.datetime.now().strftime("%H:%M:%S")} --> {msg}{Style.RESET_ALL + Fore.RESET}')
 
                             if answ.isalpha():
                                 if answ.lower() == 'y':
