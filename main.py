@@ -39,8 +39,8 @@ def main() :
         sys.exit(1)
 
 
-    parser = argparse.ArgumentParser( description='This is the the full list of availables flags.' )
-    parser.add_argument( '-f', '--db_file', help='Name of the sqlite database used to store any retreived information.\n', required=True )
+    parser = argparse.ArgumentParser( description='This is the the full list of availables flags for LazyOSINT v0.2.' )
+    parser.add_argument( '-f', '--db_file', help='Name of the sqlite database used to store any retreived information.\n' )
     parser.add_argument( '-s', '--sneaky', action='store_true', help='Do not show any LOG on screen.\n')
     parser.add_argument( '-d', '--domain', help='Target domain.\n')
     parser.add_argument( '-l', '--log_file', help='Name of file where to write all the logs.\n')
@@ -55,13 +55,25 @@ def main() :
     parser.add_argument( '-S', '--skip_google', action='store_true', help='Skip Google search for hidden profiles.\n')
     parser.add_argument( '-r', '--resume_linkedin', action='store_true', help='Resume an interrupted LinkedIn scraper - Need to specify the exact same LinkedIn url (-u).\n')
 
+    parser.add_argument( '-v', '--version', action='store_true', help='Just print version and exit.\n')
+
     args = parser.parse_args()
+
+    if args.version:
+        print( Fuffa.version )
+        sys.exit(0)
+
+
 
     # report_name = fPath( args.report_name, 'doc' )
     db_file = fPath( args.db_file, 'db' )
     log_file = fPath( args.log_file, 'log' )
 
     log = Logger( args.sneaky, log_file ) if log_file else Logger( args.sneaky )
+    
+    if not db_file:
+        log.error( f'Please add a filename for the database with -f. (Yes you have to)' )
+        sys.exit(1)
 
     if not args.sneaky:
         print( Fuffa.banner1 )
