@@ -1,19 +1,20 @@
 #!/usr/bin/env python3.8
 
-import sys
 import os
 import re
-import getpass
+import sys
+import shutil
 import string
+import getpass
+import hashlib
 import argparse
 import configparser
-import shutil
 import concurrent.futures
 from urllib.parse import quote
 from platform import python_version
 
-from lib.logger import Stash, Logger, Fuffa
 from lib.domains import whoisNstuff
+from lib.logger import Stash, Logger, Fuffa
 from lib.linkedinCompanyScraper import LinkedIn
 
 def fPath( name , t ):
@@ -22,10 +23,10 @@ def fPath( name , t ):
         os.makedirs( out_fold )
 
     if name:
-        valid_chars = f'_{string.ascii_letters}{string.digits}'
+        valid_chars = f'._{string.ascii_letters}{string.digits}'
         myName = ''.join(c for c in name if c in valid_chars)
         fp = os.path.join( out_fold , myName )
-        return fp + '.docx' if t == 'doc' else fp + '.db' if t == 'db' else fp + '.lazyLog'
+        return fp if t == 'tmp' else fp + '.db' if t == 'db' else fp + '.lazyLog'
     else:
         return None
 
@@ -48,6 +49,12 @@ def main() :
     parser.add_argument( '-p', '--password', help='Linkedin password. If omitted and arg -u is given, you will be prompted fro a password.\n')
     parser.add_argument( '-u', '--linkedin_url', help='Target company\'s Linkedin Profile. Example --> https://www.linkedin.com/company/niceCompanyName/\n')
     parser.add_argument( '-N', '--no_resolv', action='store_true', help='Do NOT resolv subdomains nor check for open ports.\n')
+    
+    parser.add_argument( '-B', '--beeep_n_pause_captcha', action='store_true', help='Pause when LazyOSINT hits reCAPTCHA and Beep!\n')
+    parser.add_argument( '-b', '--pause_captcha', action='store_true', help='Pause when LazyOSINT hits reCAPTCHA, no beep.\n')
+    parser.add_argument( '-S', '--skip_google', action='store_true', help='Skip Google search for hidden profiles.\n')
+    parser.add_argument( '-r', '--resume_linkedin', action='store_true', help='Resume an interrupted LinkedIn scraper - Need to specify the exact same LinkedIn url (-u).\n')
+
     args = parser.parse_args()
 
     # report_name = fPath( args.report_name, 'doc' )
@@ -78,6 +85,8 @@ def main() :
     if linkedin_url:
         stash.db_init( linkedin_url )
         urlecoded = quote( linkedin_url , safe=':/' )
+        temp_file = fPath( f'.{str(hashlib.sha1( linkedin_url.encode() ).hexdigest())}' , 'tmp' )
+
         if 'https://www.linkedin.com/' in urlecoded :
             linkedin_url = urlecoded
         else :
@@ -121,9 +130,9 @@ def main() :
         if not password:
             password = getpass.getpass( prompt='Password: ' )
 
-        lnkd = LinkedIn( log, stash )
-        linkedinT = [ t.submit( lnkd.scrapeThoseEmployeez, email, password, linkedin_url ) ]
-        # lnkd.scrapeThoseEmployeez( email, password, linkedin_url )
+        lnkd = LinkedIn( log, stash, linkedin_url, temp_file, args.resume_linkedin, args.pause_captcha, args.beeep_n_pause_captcha, args.skip_google )
+        linkedinT = [ t.submit( lnkd.scrapeThoseEmployeez, email, password ) ]
+        # lnkd.scrapeThoseEmployeez( email, password )
 
     if domain :
         doms = whoisNstuff( log, stash )
@@ -139,7 +148,6 @@ def main() :
 
     if linkedin_url :
         lin = [ x.result() for x in concurrent.futures.as_completed( linkedinT ) ]
-
 
     # if report_name:
     #     rep = Reporting( db_file, report_name, log )
