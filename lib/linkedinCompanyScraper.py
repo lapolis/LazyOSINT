@@ -34,6 +34,8 @@ class LinkedIn :
         self.t_file = temp_file
         self.resume = res
         self.s_google = skip_google
+        self.pause = pause
+        self.b_pause = beeppause
         
         if self.resume:
             if os.path.exists( self.t_file ):
@@ -55,6 +57,15 @@ class LinkedIn :
 
     def __sleep_rand( self ):
         time.sleep( random.randrange(1000,2000) * 0.001 )
+
+    def beeeeep( self ):
+        duration = 0.1
+        for freq in range(200,400,50):
+            os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
+        time.sleep(.2)
+        os.system('play -nq -t alsa synth {} sine {}'.format(duration, 400))
+        time.sleep(.1)
+        os.system('play -nq -t alsa synth {} sine {}'.format(duration, 400))
 
     def login( self, email, password ):
         self.driver.get("https://www.linkedin.com/login")
@@ -87,7 +98,34 @@ class LinkedIn :
 
             if not self.s_google:
                 self.log.info( f'User info parsed, trying inverse image search...' )
-                name, prof_link = self.goog.getThem( pic_lnk, job_title, location )
+
+                name, prof_link, ban = self.goog.getThem( pic_lnk, job_title, location )
+
+                while ban:
+                    print(f'checking {job_title} - {location} - {pic_lnk}')
+                    if self.pause or self.b_pause:
+                        if self.b_pause:
+                            self.beeeeep()
+
+                        self.log.warning( 'System paused, do what you need to do.. ..' )
+
+                        right = False
+                        while not right:
+                            self.log.warning( 'Do you want to retry the same query? [Yy/Nn]' )
+                            answ = input()
+
+                            if answ.isalpha():
+                                if answ.lower() == 'y':
+                                    name, prof_link, ban = self.goog.getThem( pic_lnk, job_title, location )
+                                    right = True
+                                elif answ.lower() == 'n':
+                                    right = True
+                                    ban = False
+                                else:
+                                    self.log.error( 'That was not an answer. Let\'s try again.' )
+                            else:
+                                self.log.error( 'That was not an answer. Let\'s try again.' )
+
             else:
                 name, prof_link = None, None
 
@@ -211,7 +249,7 @@ class LinkedIn :
                 tmp.write(f'{self.base_url_employees}\n')
                 tmp.write(f'{self.driver.current_url}\n')
 
-            if totPages > 1 :
+            if int(totPages) > 1 :
                 pag_num = self.driver.find_element_by_xpath( currentPage )
                 p_real = pag_num.find_element_by_css_selector('span').text
             else:

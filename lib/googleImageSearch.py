@@ -50,15 +50,6 @@ class GetThem:
         self.log.info( f'Sleeping --> {ttt} seconds' )
         time.sleep( ttt )
 
-    def beeeeep( self ):
-        duration = 0.1
-        for freq in range(200,400,50):
-            os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
-        time.sleep(.2)
-        os.system('play -nq -t alsa synth {} sine {}'.format(duration, 400))
-        time.sleep(.1)
-        os.system('play -nq -t alsa synth {} sine {}'.format(duration, 400))
-
     def getThem( self, img_link, job_title, location ):
 
         name = None
@@ -111,27 +102,9 @@ class GetThem:
                 name = ' '.join( link.split( '/' )[-1].split('-')[:-1] )
                 self.log.findings( f'Found potential matching account --> {name}' )
             elif BAN in search_results.text:
-                self.log.error( 'GOOGLE trowed a reCAPTCHA.' )
-
+                self.log.error( 'GOOGLE threw a reCAPTCHA.' )
                 if self.pause or self.b_pause:
-                    if self.b_pause:
-                        self.beeeeep()
-                    self.log.warning( 'System paused, do what you need to do.. ..' )
-
-                    right = False
-                    while not right:
-                        self.log.warning( 'Do you want to retry the same query? [Yy/Nn]' )
-                        answ = input()
-
-                        if answ.isalpha():
-                            if answ.lower() == 'y':
-                                self.getThem( img_link, job_title, location )
-                            elif answ.lower() == 'n':
-                                right = True
-                            else:
-                                self.log.error( 'That was not an answer. Let\'s try again.' )
-                        else:
-                            self.log.error( 'That was not an answer. Let\'s try again.' )
+                    return None, None, True
 
                 else:
                     self.gooBan = False
@@ -147,6 +120,6 @@ class GetThem:
             self.log.error( '''Google doesn't like us anymore''' )
 
         if name and link:
-            return name, link
+            return name, link, False
         else:
-            return None, None
+            return None, None, False
