@@ -131,9 +131,8 @@ def main() :
             password = getpass.getpass( prompt='Password: ' )
 
         lnkd = LinkedIn( log, stash, linkedin_url, temp_file, args.resume_linkedin, args.pause_captcha, args.beeep_n_pause_captcha, args.skip_google )
-        # linkedinT = [ t.submit( lnkd.scrapeThoseEmployeez, email, password ) ]
-        lnkd.scrapeThoseEmployeez( email, password )
-        exit(0)
+        linkedinT = [ t.submit( lnkd.scrapeThoseEmployeez, email, password ) ]
+        # lnkd.scrapeThoseEmployeez( email, password )
 
     if domain :
         doms = whoisNstuff( log, stash )
