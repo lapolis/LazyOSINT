@@ -52,6 +52,7 @@ def main() :
     
     parser.add_argument( '-B', '--beeep_n_pause_captcha', action='store_true', help='Pause when LazyOSINT hits reCAPTCHA and Beep!\n')
     parser.add_argument( '-b', '--pause_captcha', action='store_true', help='Pause when LazyOSINT hits reCAPTCHA, no beep.\n')
+    parser.add_argument( '-S', '--skip_google', action='store_true', help='Skip Google search for hidden profiles.\n')
     parser.add_argument( '-r', '--resume_linkedin', action='store_true', help='Resume an interrupted LinkedIn scraper - Need to specify the exact same LinkedIn url (-u).\n')
 
     args = parser.parse_args()
@@ -129,10 +130,10 @@ def main() :
         if not password:
             password = getpass.getpass( prompt='Password: ' )
 
-        lnkd = LinkedIn( log, stash, linkedin_url, temp_file, res=args.resume_linkedin, pause=args.pause_captcha, beeppause=args.beeep_n_pause_captcha )
-        
-        ### linkedinT = [ t.submit( lnkd.scrapeThoseEmployeez, email, password, linkedin_url ) ]
+        lnkd = LinkedIn( log, stash, linkedin_url, temp_file, args.resume_linkedin, args.pause_captcha, args.beeep_n_pause_captcha, args.skip_google )
+        # linkedinT = [ t.submit( lnkd.scrapeThoseEmployeez, email, password ) ]
         lnkd.scrapeThoseEmployeez( email, password )
+        exit(0)
 
     if domain :
         doms = whoisNstuff( log, stash )
@@ -148,7 +149,6 @@ def main() :
 
     if linkedin_url :
         lin = [ x.result() for x in concurrent.futures.as_completed( linkedinT ) ]
-
 
     # if report_name:
     #     rep = Reporting( db_file, report_name, log )
