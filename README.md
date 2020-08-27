@@ -50,20 +50,67 @@ chmod +x ./main.py
 
 
 # Usage Examples
-#### Run a full domain enumeration targeting "londonmet.ac.uk", save the database "myDatabaseName" and the log file "myLogFile".
+<b>Run the LinkedIn scraping module AND a full domain enumeration.</b>
+```
+./main.py -f myDatabaseName -u https://www.linkedin.com/school/london-metropolitan-university/ -e example@gmail.com -d londonmet.ac.uk -l myLogFile
+```
+
+<b>Run a full domain enumeration</b> targeting "londonmet.ac.uk", save the database "myDatabaseName" and the log file "myLogFile".
 ```
 ./main.py -f myDatabaseName -d londonmet.ac.uk -l myLogFile
 ```
+## LinkedIn stuff
+If you do not want to submit your LinkedIn email and password as a argument, just omit `-e` and `-p`, LazyOSINT will ask both when needed.
 
-#### Run the LinkedIn scraping module against LondonMet LinkedIn page using as a ALREADY EXISTING LinkedIn account email "`example@gmail.com`" with password "password" and save all the data database "myDatabaseName".
+<b>Run the LinkedIn scraping module</b> against LondonMet LinkedIn page using as a ALREADY EXISTING LinkedIn account email "`example@gmail.com`" with password "password" and save all the data database "myDatabaseName".
 If you do not specify the LinkedIn password in the command line it will be asked later.
 ```
 ./main.py -f myDatabaseName -u https://www.linkedin.com/school/london-metropolitan-university/ -e example@gmail.com -p password
 ```
 
-#### Run the LinkedIn scraping module and a full domain enumeration.
+<b>Resume</b> the LinkedIn scraping module against LondonMet page that has been interrupted (also after reboot). Please note that the url MUST be the same string ( `https://www.linkedin.com/school/london` != `https://www.linkedin.com/school/london/` ).
 ```
-./main.py -f myDatabaseName -u https://www.linkedin.com/school/london-metropolitan-university/ -e example@gmail.com -d londonmet.ac.uk -l myLogFile
+./main.py -f myDatabaseName -u https://www.linkedin.com/school/london-metropolitan-university/ -r
+```
+
+<b>Stop at reCaptcha</b>. This was a request I got which actually make sense. If you have a nice VPN you might be able to change IP and then carry on with the scan.
+Every time it stops, you are asked whether you want to retry the same query where you got the reCaptcha or if you want to pass and go to the next one. Please <b>note</b> that if you are running the domain enumeration, that message will likely go out of screen; at this point you can either input the answer `[Yy/Nn]` or press enter and get the question printed again.
+```
+./main.py -f myDatabaseName -u https://www.linkedin.com/school/london-metropolitan-university/ -b
+```
+
+<b>Stop at reCaptcha</b> and <b>BEEEP!</b>. Yes, it will make a sound whenever a reCaptcha is hit. (I might add more ringtone in the future lol). (You need to install `sox`)
+```
+./main.py -f myDatabaseName -u https://www.linkedin.com/school/london-metropolitan-university/ -B
+```
+
+<b>Skip Google dorking</b>. This is just in case you have tons of contacts and you prefer to be quick rather than trying to find all the hidden users. The private users information are stored anyway.
+```
+./main.py -f myDatabaseName -u https://www.linkedin.com/school/london-metropolitan-university/ -S
+```
+
+# Full helper
+```
+usage: main.py [-h] [-f DB_FILE] [-s] [-d DOMAIN] [-l LOG_FILE] [-e EMAIL] [-p PASSWORD] [-u LINKEDIN_URL] [-N] [-B] [-b] [-S] [-r] [-v]
+
+This is the the full list of availables flags for LazyOSINT v0.2.
+
+optional arguments:
+  -h, --help                        Show this help message and exit
+  -f DB_FILE, --db_file DB_FILE     Name of the sqlite database used to store any retreived information.
+  -s, --sneaky                      Do not show any LOG on screen.
+  -d DOMAIN, --domain DOMAIN        Target domain.
+  -l LOG_FILE, --log_file LOG_FILE  Name of file where to write all the logs.
+  -e EMAIL, --email EMAIL           Linkedin registered email address.
+  -p PASSWORD, --password PASSWORD  Linkedin password. If omitted and arg -u is given, you will be prompted fro a password.
+  -u LINKEDIN_URL, --linkedin_url LINKEDIN_URL
+                                    Target company's Linkedin Profile. Example --> https://www.linkedin.com/company/niceCompanyName/
+  -N, --no_resolv                   Do NOT resolv subdomains nor check for open ports.
+  -B, --beeep_n_pause_captcha       Pause when LazyOSINT hits reCAPTCHA and Beep!
+  -b, --pause_captcha               Pause when LazyOSINT hits reCAPTCHA, no beep.
+  -S, --skip_google                 Skip Google search for hidden profiles.
+  -r, --resume_linkedin             Resume an interrupted LinkedIn scraper - Need to specify the exact same LinkedIn url (-u).
+  -v, --version                     Just print version and exit.
 ```
 
 
