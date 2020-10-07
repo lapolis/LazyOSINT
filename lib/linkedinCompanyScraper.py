@@ -76,7 +76,7 @@ class LinkedIn :
         email_elem.send_keys(email)
         password_elem = self.driver.find_element_by_id("password")
         password_elem.send_keys(password)
-        self.driver.find_element_by_tag_name("button").click()
+        self.driver.find_element_by_class_name("btn__primary--large").click()
 
         element = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "profile-nav-item")))
 
@@ -182,9 +182,15 @@ class LinkedIn :
                 infos = None
 
     def scrapeThoseEmployeez( self, email, password ):
-        self.login( email , password )
+        
+        try:
+            self.login( email , password )
+            self.log.info( f'LinkeIn logged in correctly' )
+        except Exception as e:
+            self.log.error( f'LinkedIn login error --> {e}' )
 
         # marks xpath
+        see_employees_xpath = '//div[@class="mt2"]'
         currentPage = "//button[@aria-current='true']"
         list_css = "search-results"
         peepz = '//div[@data-test-search-result="PROFILE"]'
@@ -198,12 +204,7 @@ class LinkedIn :
         self.driver.get( self.c_link )
 
         self.__sleep_rand()
-        self.driver.execute_script( f'window.scrollTo(0, Math.ceil(document.body.scrollHeight/{ 1 / random.random() }));' )
-
-        self.__sleep_rand()
-        see_all_employees = self.driver.find_element_by_xpath('//a[@data-control-name="topcard_see_all_employees"]')
-        self.driver.get(see_all_employees.get_attribute("href"))
-
+        self.driver.find_element_by_xpath( see_employees_xpath ).click()
 
         _ = WebDriverWait(self.driver, 15 ).until(EC.presence_of_element_located((By.CLASS_NAME, list_css)))
         _ = WebDriverWait(self.driver, 20 ).until(EC.presence_of_element_located((By.XPATH, chat_xpath)))
