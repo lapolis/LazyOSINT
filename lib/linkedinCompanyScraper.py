@@ -1,238 +1,290 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.8
 
 import os
-import re
 import time
-import tweepy
-import hashlib 
-import argparse
+import random
 import datetime
-import requests
-import configparser
-from bs4 import BeautifulSoup
 from selenium import webdriver
-from platform import python_version
 from colorama import Fore, Back, Style
 from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.command import Command
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.options import Options 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-os.system('clear')
+from lib import googleImageSearch
 
-if python_version()[0:3] < '3.7':
-	print('\n\nMake sure you have Python 3.7+ installed, quitting.\n\n')
-	exit(1)
+class LinkedIn :
+    def __init__( self, log, stash, company_url, temp_file, res, pause, beeppause, skip_google ):
+        self.chrome_options = Options()
+        self.chrome_options.add_argument("--headless")
+        self.chrome_options.add_argument("--window-size=1920,1080")
+        self.driver = webdriver.Chrome(chrome_options=self.chrome_options)
+        # self.driver = webdriver.Chrome()
 
-parser = argparse.ArgumentParser()
-parser.add_argument( '-f', '--firefox_binary', help='Specify the full path of Firefox/Firefox-esr. Not the symbolic link!\n' )
-args = parser.parse_args()
+        # self.driver.set_network_conditions( offline=False,
+        #                                latency=9,  # additional latency (ms)
+        #                                download_throughput=50 * 1024,  # maximal throughput
+        #                                upload_throughput=50 * 1024 )  # maximal throughput
 
-# selenium/requests stuff
-fir_bin = args.firefox_binary
-headers = {
-	'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0',
-}
+        self.log = log
+        self.goog = googleImageSearch.GetThem( log, pause, beeppause )
+        self.stash = stash
+        # self.t = concurrent.futures.ThreadPoolExecutor(max_workers=100)
+        # self.threads = []
 
-# cause colours matter!!
-G = f'{Fore.GREEN}{Style.BRIGHT}'
-GG = f'{Fore.BLACK}{Back.GREEN}'
-Y = f'{Fore.YELLOW}'
-R = f'{Fore.RED}{Style.BRIGHT}'
-C = f'{Fore.CYAN}{Style.BRIGHT}'
-RES = f'{Style.RESET_ALL}'
+        self.c_link = company_url
+        self.t_file = temp_file
+        self.resume = res
+        self.s_google = skip_google
+        self.pause = pause
+        self.b_pause = beeppause
+        
+        if self.resume:
+            if os.path.exists( self.t_file ):
+                self.checkpoint = True
+                with open( self.t_file , 'r' ) as tmp:
+                    self.base_url_employees = tmp.readline().strip()
+                    self.current_page = tmp.readline().strip()
 
-# general stuff
-LOCATION = os.getcwd()
-STARTED = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+                try:
+                    self.p = int(self.current_page[-1])
+                except:
+                    self.p = 1
 
-# doing some mess on your folder
-l_list = []
-PASTE_FILE = f'{LOCATION}/pasteList.txt'
-if os.path.exists( PASTE_FILE ):
-	with open( PASTE_FILE , 'r' ) as rf:
-		l_list = rf.read().split('\n')
-else :
-	with open( PASTE_FILE , 'w' ) as wf:
-		wf.write('')
+                self.log.info( f'Resumign from page {self.p}' )
 
-ERRORS_FILE = f'{LOCATION}/errors.txt'
-if not os.path.exists( ERRORS_FILE ):
-	with open( ERRORS_FILE , 'w' ) as wf :
-		wf.write('')
+            else:
+                self.checkpoint = False
+                self.log.error( f'There is no chekpoint saved for {self.c_link}' )
 
-DUMP_FOLDER = f'{LOCATION}/dumps/'
-if not os.path.exists( DUMP_FOLDER ):
-	os.mkdir( f'{DUMP_FOLDER}' )
+    def __sleep_rand( self ):
+        time.sleep( random.randrange(1000,2000) * 0.001 )
 
-API_CONF_FILE = f'{LOCATION}/tweet_API.conf'
-if not os.path.exists( API_CONF_FILE ):
-	print( f'[{R}E{RES}] tweet_API.conf {R}MISSING{RES}!' )
-	print( f'[{R}E{RES}] It might be good if you {R}RTFM{RES}!' )
-	exit(1)
+    def beeeeep( self ):
+        duration = 0.1
+        for freq in range(200,400,50):
+            os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
+        time.sleep(.2)
+        os.system('play -nq -t alsa synth {} sine {}'.format(duration, 400))
+        time.sleep(.1)
+        os.system('play -nq -t alsa synth {} sine {}'.format(duration, 400))
 
-# def get_status(driver):
-# 	try:
-# 		driver.execute(Command.STATUS)
-# 		return True
-# 	except:
-# 		return False
+    def login( self, email, password ):
+        self.driver.get("https://www.linkedin.com/login")
+        element = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "username")))
+        email_elem = self.driver.find_element_by_id("username")
+        email_elem.send_keys(email)
+        password_elem = self.driver.find_element_by_id("password")
+        password_elem.send_keys(password)
+        self.driver.find_element_by_class_name("btn__primary--large").click()
 
-def user_pass ( tweet ) :
-	return tweet.split(' ')[1] if 'contains credentials' in tweet else None
+        element = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "profile-nav-item")))
 
-def tweepyApiInit(conf_file):
-	# getting your keys
-	config = configparser.ConfigParser()
-	config.read( conf_file )
+    def pleaseReadMe( self , peep_object , name , pic_link ) :
+        try:
+            prof_link = peep_object.find_element_by_tag_name( 'a' ).get_attribute( 'href' )
+            job_title = peep_object.find_element_by_tag_name( 'p' ).text
+        except Exception as e:
+            self.log.error( e )
 
-	try:
-		consumer_key = config['TWEEPY']['consumer_key']
-		consumer_secret = config['TWEEPY']['consumer_secret']
-		access_key = config['TWEEPY']['access_key']
-		access_secret = config['TWEEPY']['access_secret']
-	except Exception as e:
-		print( f'[{R}E{RES}] Missing {e} on tweet_API.conf!' )
-		exit(1)
+        sqlq = 'INSERT INTO employees( comp_link, name, position, prof_link, prof_pic ) VALUES(?, ?, ?, ?, ?)'
+        sqlv = ( self.c_link, name, job_title, prof_link, pic_link )
+        self.log.findings( f'Found employye {name}, working as {job_title}' )
+        self.stash.sql_execcc( sqlq, sqlv )
 
-	# authorize twitter, initialize tweepy
-	auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-	auth.set_access_token(access_key, access_secret)
-	return tweepy.API(auth)
 
-def logError(e):
-	ct = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-	with open( ERRORS_FILE , 'a' ) as af :
-		print( f'[{R}E{RES}] We got an {R}ERROR{RES}!' )
-		af.write( f'---------------- !!Error!! ----------------\nTime and date: {ct}\n{str(e)}\n\n' )
+    def hardToFind( self, job_title, location, pic_lnk ) :
+        try:
+            # job_title = infos[0].text
+            # location = infos[1].text
 
-def writeDump(file, text):
-	with open( file, 'w+' ) as ff:
-		ff.write(text)
+            if not self.s_google:
+                self.log.info( f'User info parsed, trying inverse image search...' )
 
-##### main
-print( f'[{Y}~{RES}] Connecting Tweeter {Y}^.^{RES}' )
-api = tweepyApiInit(API_CONF_FILE)
-print( f'[{G}+{RES}] Connected {G}:D{RES}' )
+                name, prof_link, ban = self.goog.getThem( pic_lnk, job_title, location )
 
-## making stuff ready for the looooooop
-print( f'[{C}i{RES}] If you get sick looping just press brutally Ctrl+C.' )
-nTweets = 200
-credz_curr = 0
-credz_canc = 0
-credz_tot = sum( 1 for line in open( PASTE_FILE ) )
-errors = 0
-tweet_api_errors = 0
+                while ban:
+                    print(f'checking {job_title} - {location} - {pic_lnk}')
+                    if self.pause or self.b_pause:
+                        if self.b_pause:
+                            self.beeeeep()
 
-## selenium stuff
-profile = webdriver.FirefoxProfile()
-profile.set_preference("dom.webdriver.enabled", False)
-profile.update_preferences()
-desired = DesiredCapabilities.FIREFOX
-options = Options()
-options.headless = True
-if fir_bin:
-	driver = webdriver.Firefox(firefox_binary=fir_bin, options=options, firefox_profile=profile, desired_capabilities=desired)
-else:
-	driver = webdriver.Firefox(options=options, firefox_profile=profile, desired_capabilities=desired)
-time.sleep(1)
+                        self.log.warning( 'System paused, do what you need to do.. ..' )
 
-while True :
+                        right = False
+                        while not right:
+                            msg = 'Do you want to retry the same query? [Yy/Nn] '
+                            answ = input(f'{Fore.YELLOW}## WARNING {datetime.datetime.now().strftime("%H:%M:%S")} --> {msg}{Style.RESET_ALL + Fore.RESET}')
 
-	if tweet_api_errors > 10:
-		print( f'[{R}E{RES}] Something is not right with your Tweeter API!' )
-		exit(1)
+                            if answ.isalpha():
+                                if answ.lower() == 'y':
+                                    name, prof_link, ban = self.goog.getThem( pic_lnk, job_title, location )
+                                    right = True
+                                elif answ.lower() == 'n':
+                                    right = True
+                                    ban = False
+                                else:
+                                    self.log.error( 'That was not an answer. Let\'s try again.' )
+                            else:
+                                self.log.error( 'That was not an answer. Let\'s try again.' )
 
-	try:
-		scav_tweets = api.user_timeline(screen_name = 'leak_scavenger', count = nTweets , include_rts = True)
-		tweet_api_errors = 0
-	except tweepy.TweepError as e:
-		print( f'[{R}E{RES}] Tweepy got stuck!' )
-		logError(e)
-		errors += 1
-		tweet_api_errors += 1
-		time.sleep(10)
-		scav_tweets = []
-		continue
+            else:
+                name, prof_link = None, None
 
-	print( f'[{C}~{RES}] Parsing the hell out of the {R}scavenger!{RES} {C}o.O{RES}' )
+            if name and prof_link:
+                sqlq = 'INSERT INTO potential_employees( comp_link, name, position, prof_link, prof_pic ) VALUES(?, ?, ?, ?, ?)'
+                sqlv = ( self.c_link, name, job_title, prof_link, pic_lnk )
+                self.log.findings( f'Found potential employe {name}, working as {job_title}' )
+                self.stash.sql_execcc( sqlq, sqlv )
+            else:
+                pic_lnk = pic_lnk if pic_lnk else 'NA'
+                sqlq = 'INSERT INTO hidden_employees( comp_link, position, prof_pic ) VALUES(?, ?, ?)'
+                sqlv = ( self.c_link, job_title, pic_lnk )
+                self.log.warning( f'Impossible to find user. Details saved anyway.' )
+                self.stash.sql_execcc( sqlq, sqlv )
 
-	for tweet in scav_tweets :
-		userpass_link = user_pass( tweet.text )
+        except Exception as e:
+            self.log.error( e )
 
-		if userpass_link:
-			if not userpass_link in l_list:
-				
-				with open( PASTE_FILE , 'a' ) as af :
-					af.write( f'{userpass_link}\n' )
-				l_list.append(userpass_link)
 
-				s = requests.Session()
-				r = s.get( userpass_link , headers=headers, allow_redirects=True )
-				rLink = re.findall( r'(?:;URL=)(.*?)(?:"><)' , r.text )[0]
+    def sortEmployee( self , emp_obj ) :
+        #checking if the name is pubblic
+        try :
+            name = emp_obj.find_element_by_class_name( "actor-name" ).text
+        except Exception as e :
+            self.log.error( e )
 
-				temp_filename = f'{DUMP_FOLDER}{hashlib.md5(rLink.encode()).hexdigest()}'
+        # checking if there is any pic
+        try :
+            pic_link = emp_obj.find_element_by_tag_name( 'img' ).get_attribute( 'src' )
+        except Exception as e :
+            self.log.warning( 'No profile pic' )
+            pic_link = None
 
-				if 'pastebin' in rLink :
-					if r.status_code == 200 or r.status_code == 403 :
-						print( f'[{Y}-{RES}] downloading {rLink} {Y}o.O{RES}' )
-						dump = s.get( rLink )
-						writeDump( temp_filename, dump.text )
-						print( f'[{G}+{G}] {G}DOWNLOADED!!{RES} --> {temp_filename}' )
-						credz_curr += 1
-						credz_tot += 1
-					else :
-						print( f'[{R}x{RES}] too late!!' )
-						credz_canc += 1
 
-				elif 'ghostbin' in rLink:
-					print(rLink)
-					driver.get( rLink )
-					print( f'[{Y}-{RES}] downloading {rLink} {Y}o.O{RES}' )
+        if name != 'LinkedIn Member':
+            self.pleaseReadMe( emp_obj , name , pic_link )
+        else :
+            try:
+                infos = emp_obj.find_elements_by_tag_name( 'p' )
 
-					ccc = 0
-					## wait for Cl0u*f74r3 to think 
-					## that my bot is not a bot
-					## so that my bot can check 
-					## stuff that the bots cannot check
-					_ = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-					while 'Checking your browser before accessing' in driver.page_source:
-						if ccc > 100:
-							print( f'[{R}x{RES}] mmmmh.. did Cl0u*f74r3 got me?' )
-							e = f'Got stuck here:\n{driver.page_source}'
-							logError(e)
-							break
-						time.sleep(0.3)
-						ccc += 1
+                if pic_link:
+                    self.log.info( f'Need to google this pic --> {pic_link}' )
+                    self.hardToFind( infos[0].text, infos[1].text, pic_link )
+                    # self.threads.append( self.t.submit( self.hardToFind, infos[0].text, infos[1].text, pic_link ) )
+                else:
+                    self.log.warning( f'This one is a ghost, manual research needed!' )
+                    # self.threads.append( self.t.submit( self.hardToFind, infos[0].text, infos[1].text, None ) )
+                    self.hardToFind( infos[0].text, infos[1].text, None )
 
-					soup = BeautifulSoup(driver.page_source, features='lxml')
-					with open( temp_filename, 'w+' ) as ff:
-						ff.write(soup.text)
+            except Exception as e:
+                self.log.warning( 'No user info' )
+                infos = None
 
-					print( f'[{G}+{RES}] {GG}DOWNLOADED!!{RES} --> {temp_filename}' )
-					credz_curr += 1
-					credz_tot += 1
+    def scrapeThoseEmployeez( self, email, password ):
+        
+        try:
+            self.login( email , password )
+            self.log.info( f'LinkeIn logged in correctly' )
+        except Exception as e:
+            self.log.error( f'LinkedIn login error --> {e}' )
 
-				else:
-					print( f'[{R}x{RES}] I am sure that "{rLink}" is not a url --> {R}:({RES}' )
-					logError(f'Weird link --> {rLink}')
+        # marks xpath
+        see_employees_xpath = '//div[@class="mt2"]'
+        currentPage = "//button[@aria-current='true']"
+        list_css = "search-results"
+        peepz = '//div[@data-test-search-result="PROFILE"]'
+        next_xpath = '//button[@aria-label="Next"]'
+        chat_xpath = '//header[@data-control-name="overlay.minimize_connection_list_bar"]'
+        chat_down_xpath = '//header[@data-control-name="overlay.maximize_connection_list_bar"]'
 
-			else :
-				print( f'[{R}x{RES}] Nothing new to be exited about --> {R}:({RES}' )
-				
-	print( f'[{C}i{RES}] Script started @ {C}{STARTED}{RES}!' )
-	if errors > 0:
-		print( f'[{C}*{RES}] {C}Tweepy{RES} got {R}{errors}{RES} errors!' )
-	else:
-		print( f'[{Y}-{RES}] {Y}No errors.{R} So far so good {RES}' )
-	if credz_canc > 0:
-		print( f'[{R}*{RES}] LOST {R}{credz_canc}{RES} paste you SLOW!' )
-	else:
-		print( f'[{Y}-{RES}] LOST {Y}NO{RES} pastes so far! Keep it up!' )
-	print( f'[{G}+{RES}] Downloaded {G}{credz_curr}{RES} paste on thiz sesh {G}:F{RES}' )
-	print( f'[{G}+{RES}] Downloaded {GG}{credz_tot}{RES} paste on total {GG}^0^{RES}' )
-	print( f'[{C}O{RES}] Sleeping a bit {C}-.-{RES}' )
-	time.sleep(60)
-	nTweets = 20
+        employees = []
+
+        self.log.info( f'Scraping the employees from {self.c_link}' )
+        self.driver.get( self.c_link )
+
+        self.__sleep_rand()
+        self.driver.find_element_by_xpath( see_employees_xpath ).click()
+
+        _ = WebDriverWait(self.driver, 15 ).until(EC.presence_of_element_located((By.CLASS_NAME, list_css)))
+        _ = WebDriverWait(self.driver, 20 ).until(EC.presence_of_element_located((By.XPATH, chat_xpath)))
+
+        self.driver.execute_script("window.scrollTo(0, Math.ceil(document.body.scrollHeight*3/4));")
+
+        self.driver.find_element_by_xpath( '//section[@class="msg-overlay-bubble-header__details flex-row align-items-center"]' ).click()
+        # yes I know, do not judge me, this chat is fucking killing me
+        while True:
+            try:
+                _ = WebDriverWait(self.driver, 10 ).until(EC.presence_of_element_located((By.XPATH, chat_down_xpath)))
+                time.sleep(1.2)
+                break
+            except Exception as e:
+                self.log.warning('That chat is not going down againt... trying it again...')
+                self.driver.find_element_by_xpath( '//section[@class="msg-overlay-bubble-header__details flex-row align-items-center"]' ).click()
+                continue
+
+        try:
+            # totPages = self.driver.find_elements_by_xpath("//li[@class='artdeco-pagination__indicator artdeco-pagination__indicator--number ember-view']")[-1].text
+            totPages_arr = self.driver.find_elements_by_xpath("//li[@class='artdeco-pagination__indicator artdeco-pagination__indicator--number ember-view']")
+            if len(totPages_arr) == 0:
+                totPages = 1
+            else:
+                totPages = totPages_arr[-1].text
+        except Exception as e:
+            self.log.error('I guess linkedin changed the page xpath again --> {e}')
+            exit(1)
+
+        self.log.info( f'Total pages found --> {totPages}' )
+
+
+        # for p in range ( int(totPages) ):
+        if self.resume and self.checkpoint:
+            self.driver.get( self.current_page )
+            # base_url_employees = self.base_url_employees
+            # p = self.p
+        else:
+            self.p = 1
+            self.base_url_employees = self.driver.current_url
+
+        while self.p <= int(totPages):
+
+            with open( self.t_file , 'w' ) as tmp:
+                tmp.write(f'{self.base_url_employees}\n')
+                tmp.write(f'{self.driver.current_url}\n')
+
+            if int(totPages) > 1 :
+                pag_num = self.driver.find_element_by_xpath( currentPage )
+                p_real = pag_num.find_element_by_css_selector('span').text
+            else:
+                p_real = '1'
+            self.log.info( f'Parsing page {p_real}' )
+
+            self.driver.execute_script("window.scrollTo(0, Math.ceil(document.body.scrollHeight/4));")
+            self.__sleep_rand()
+            self.driver.execute_script("window.scrollTo(0, Math.ceil(document.body.scrollHeight/3));")
+            self.__sleep_rand()
+            self.driver.execute_script("window.scrollTo(0, Math.ceil(document.body.scrollHeight/2));")
+            self.__sleep_rand()
+            self.driver.execute_script("window.scrollTo(0, Math.ceil(document.body.scrollHeight));")
+            self.__sleep_rand()
+
+            results_list = self.driver.find_element_by_class_name(list_css)
+            # results_li = results_list.find_elements_by_tag_name("li")
+            results_li = results_list.find_elements_by_xpath( peepz )
+
+            # self.threads = [ self.t.submit( self.sortEmployee, res) for res in results_li ]
+            for res in results_li:
+                self.sortEmployee( res )
+
+            self.p += 1
+            # self.driver.find_element_by_xpath(next_xpath).click()
+            self.driver.get(f'{self.base_url_employees}&page={self.p}')
+            _ = WebDriverWait(self.driver, 10 ).until(EC.presence_of_element_located((By.CLASS_NAME, list_css)))
+
+
+        self.log.info( f'All pages done!' )
+        os.remove( self.t_file )
+        self.log.info( f'Temp file removed.' )
+        # self.log.info( f'Waiting all threads to terminate.' )
+        # wait = [ x.result() for x in concurrent.futures.as_completed( self.threads ) ]
+        self.driver.close()
