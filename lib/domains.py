@@ -110,7 +110,7 @@ class whoisNstuff :
 
         ips = self.stash.get_column( 'whois', 'ip' )
 
-        for ip in ips:
+        for ip in list(set(ips)):
             sql = []
 
             try:
