@@ -109,6 +109,7 @@ class whoisNstuff :
         time2 = time.time()
 
         ips = self.stash.get_column( 'whois', 'ip' )
+        ips.remove('NA')
 
         for ip in list(set(ips)):
             sql = []
